@@ -28,22 +28,3 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
-#4 Deploy to an Azure web app slot
-- task: AzureRmWebAppDeployment@4
-  displayName: Deploy to web app
-  inputs:
-    ConnectionType: 'AzureRM'
-    azureSubscription: '$(azureSubscription)'
-    appType: 'webApp'
-    WebAppName: '$(webAppName)'
-    deployToSlotOrASE: true
-    ResourceGroupName: '$(resourceGroupName)'
-    SlotName: '$(deploySlotName)'
-    packageForLinux: '$(build.artifactStagingDirectory)\WebApp.zip'
-
-#5 Trigger the Umbraco Deploy extraction
-- task: PowerShell@2
-  displayName: Run PowerShell script
-  inputs:
-    filePath: '$(umbracoDeployTriggerDeploy)'
-    arguments: '-InformationAction:Continue -Action TriggerWithStatus -ApiSecret $(deployApiSecret) -BaseUrl $(deployBaseUrl) -Reason $(umbracoDeployReason) -Verbose'
