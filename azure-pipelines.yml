@@ -9,10 +9,18 @@ variables:
 
 
 steps:
+
+#0: Explicitly checkout with full commit history
+- checkout: self
+  fetchDepth: 0  # Critical: Disables shallow clone
 #1 NuGet Tool Install
 - task: NuGetToolInstaller@1
   displayName: Install NuGet
 
+#2: Clear NuGet cache (fixes corrupted packages)
+- script: dotnet nuget locals all --clear
+  displayName: Clear NuGet Cache
+  
 #2 NuGet Restore
 - task: NuGetCommand@2
   displayName: Restore NuGet packages
