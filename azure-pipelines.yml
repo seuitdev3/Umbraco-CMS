@@ -1,25 +1,12 @@
 trigger:
-- main
+- contrib
 
 pool:
   vmImage: 'windows-latest'
 
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+  - group: umbraco
 
-  vsSolutionName: DeployOnPremSite
-  vsProjectName: DeployOnPremSite
-  umbracoDeployTriggerDeploy: $(Build.SourcesDirectory)\$(vsSolutionName)\$(vsProjectName)\TriggerDeploy.ps1
-  umbracoDeployReason: AzureDeployment
-
-  deployApiSecret: <set in Azure Pipeline secret>
-  azureSubscription: <set in Azure Pipeline variable>
-  webAppName: <set in Azure Pipeline variable>
-  resourceGroupName: <set in Azure Pipeline variable>
-  deploySlotName: <set in Azure Pipeline variable>
-  deployBaseUrl: <set in Azure Pipeline variable>
 
 steps:
 #1 NuGet Tool Install
