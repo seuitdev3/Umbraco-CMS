@@ -1,18 +1,40 @@
+#trigger:
+#- contrib
+
 pool:
   vmImage: 'windows-latest'
 
 variables:
-  SolutionName: $(SOLUTION_NAME)
-  BuildPlatform: 'Any CPU'
-  BuildConfiguration: 'Release'
-  EnvironmentName: Production
+  - group: umbraco
+
 
 steps:
-- task: DotNetCoreCLI@2
+
+#0: Explicitly checkout with full commit history
+- checkout: self
+  fetchDepth: 0  # Critical: Disables shallow clone
+#1 NuGet Tool Install
+- task: NuGetToolInstaller@1
+  displayName: Install NuGet
+
+#2: Clear NuGet cache (fixes corrupted packages)
+- script: dotnet nuget locals all --clear
+  displayName: Clear NuGet Cache
+  
+#2 NuGet Restore
+- task: NuGetCommand@2
+  displayName: Restore NuGet packages
   inputs:
-    projects: '$(SolutionName)'
-    command: 'build'
-    arguments: '/nologo /nr:false /p:DeployOnBuild=true /p:DeployDefaultTarget=WebPublish /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:DeleteExistingFiles=True /p:SkipInvalidConfigurations=true /p:IncludeSetAclProviderOnDestination=False /p:AutoParameterizationWebConfigConnectionStrings=False /p:platform="$(BuildPlatform)" /p:configuration="$(BuildConfiguration)" /p:PackageLocation="../_build" /p:EnvironmentName=$(EnvironmentName)'
+    restoreSolution: '$(solution)'
+
+#3 Build the VS Solution and publish the output to a zip file
+- task: VSBuild@1
+  displayName: Build solution
+  inputs:
+    solution: '$(solution)'
+    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
 
 - task: PublishBuildArtifacts@1
   inputs:
